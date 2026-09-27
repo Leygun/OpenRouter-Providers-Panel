@@ -1,0 +1,32 @@
+name: release
+
+# Publishes a downloadable zip with every tagged release, so people can install
+# the panel without cloning: Releases → dsh-openrouter-providers.zip.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the install archive
+        run: |
+          set -eu
+          mkdir -p build/dsh-openrouter-providers
+          cp -R package.json lib README.md INSTALL.md INSTALL-PROMPT.md install.sh \
+            build/dsh-openrouter-providers/
+          cd build
+          zip -qr ../dsh-openrouter-providers.zip dsh-openrouter-providers
+
+      - name: Attach the archive to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dsh-openrouter-providers.zip
+          generate_release_notes: true

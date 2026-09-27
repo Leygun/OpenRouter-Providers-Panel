@@ -1,0 +1,5 @@
+.DS_Store
+*.log
+node_modules/
+cordis.patch.yml.orig
+dsh-openrouter-providers.zip
