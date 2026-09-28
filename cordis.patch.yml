@@ -1,0 +1,18 @@
+# Bundle patch for dsh-openrouter-providers.
+#
+# A profile that lists this package in `dsh.profile.bundles` applies this layer
+# automatically after the shipped bundles, so the panel mounts without any
+# manual edit of the user's own cordis.patch.yml:
+#
+#   - insert:
+#       - id: openrouter-providers
+#         name: dsh-openrouter-providers
+#
+# The row names the same package, whose host half publishes
+# POST /api/openrouter-providers and whose client half registers the settings
+# section. Adding the row by hand as well would duplicate the id, so do one or
+# the other, never both.
+
+- insert:
+    - id: openrouter-providers
+      name: dsh-openrouter-providers

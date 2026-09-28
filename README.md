@@ -38,7 +38,13 @@ blend, uptime 30 мин и 1 день, tps p50, задержка, tools, кон�
 
 ### Установка
 
-Самый быстрый путь — клонировать репозиторий и запустить установщик:
+Пакет объявлен как **бандл профиля** (`dsh.bundle` + собственный `cordis.patch.yml`),
+поэтому его понимает штатный установщик DSH: откройте плагины в интерфейсе
+(**Настройки → Плагины → «Add plugin»**), вставьте адрес репозитория
+`https://github.com/Leygun/OpenRouter-Providers-Panel` и нажмите Install — строка композиции
+добавится сама. Так же ставится в профиль `desktop`, и на Windows, и на macOS/Linux.
+
+Установка вручную — клонировать репозиторий и запустить установщик:
 
 ```sh
 git clone https://github.com/Leygun/OpenRouter-Providers-Panel.git
@@ -81,19 +87,25 @@ dsh web
 - **Скорость берётся разбором HTML** страницы модели: в публичном API поля
   `throughput_last_30m` и `latency_last_30m` приходят `null`. Если OpenRouter сменит
   разметку, режим «Лучшие + быстрые» отключится с пояснением, остальное продолжит работать.
-- Плагин ходит в OpenRouter с Host-половины через `curl` (`ctx.shell`), потому что
-  `web.fetch` умеет только URL и не отправляет заголовки. Management-ключ передаётся
-  через переменные окружения процесса, а не в аргументах командной строки.
+- Host-половина ходит в OpenRouter обычным `fetch` процесса DSH (нужны заголовки
+  авторизации, которых не умеет `web.fetch`), а `web.fetch` остаётся запасным
+  транспортом — например, если сеть идёт через прокси профиля. Никаких внешних
+  команд и `curl` плагин не запускает, поэтому одинаково работает на Linux, macOS
+  и в Desktop-профиле на Windows.
 
 ### Как устроено
 
 ```
-lib/index.js    Host-половина: Cordis-плагин, публикует POST /api/openrouter-providers
-                на общем /api-канале (Host/Origin-фенс и авторизация браузерной сессии —
-                на стороне канала). Работает с ctx.web, ctx.shell, ctx.credentials, ctx.fs.
-lib/client.js   Client-половина: бандл client-module-system
-                (window.__ModuleLoader__.load({ id, factory })), требует только baseline
-                React, регистрирует страницу в слоте settings.section.
+package.json       манифест: dsh.bundle.patch (строка монтируется самим пакетом)
+                   и dsh.client (клиентская половина для платформы web).
+cordis.patch.yml   слой композиции бандла: insert строки openrouter-providers.
+lib/index.js       Host-половина: Cordis-плагин, публикует POST /api/openrouter-providers
+                   на общем /api-канале (Host/Origin-фенс и авторизация браузерной сессии —
+                   на стороне канала). Ходит в OpenRouter через fetch процесса,
+                   запасной транспорт — ctx.web; ключи берёт из ctx.credentials.
+lib/client.js      Client-половина: бандл client-module-system
+                   (window.__ModuleLoader__.load({ id, factory })), требует только baseline
+                   React, регистрирует страницу в слоте settings.section.
 ```
 
 Ключ инференса (`OPENRT_API_KEY` и подобные) панель не трогает — он нужен самому DSH.
