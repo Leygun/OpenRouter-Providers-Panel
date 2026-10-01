@@ -1,6 +1,6 @@
 {
   "name": "dsh-openrouter-providers",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "OpenRouter provider price/speed panel for DeepSeek Harness (Web and Desktop), with guardrail write-back",
   "type": "module",
